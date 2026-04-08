@@ -71,8 +71,7 @@ def validate(filepath, expected_week=None):
             "type": "structure",
             "field": "columns",
             "severity": "error",
-            "message": f"Expected at least 4 columns, found {df.shape[1]}",
-            "fix": "Add missing columns: 社团名称, 活动内容, 活动地点, 开展时间"
+            "message": f"Expected at least 4 columns, found {df.shape[1]}"
         })
         return False, problems
 
@@ -82,8 +81,7 @@ def validate(filepath, expected_week=None):
             "type": "title",
             "field": "社团名称 (row 1)",
             "severity": "error",
-            "message": f"Title row format incorrect: '{title_text}'",
-            "fix": f"Row 1 should be: 温州商学院2025-2026学年第一学期第X周社团活动预告"
+            "message": f"Title row format incorrect: '{title_text}'"
         })
 
     # ---- 2. Data rows (df index 1+) ----
@@ -94,8 +92,7 @@ def validate(filepath, expected_week=None):
             "type": "data",
             "field": "rows",
             "severity": "error",
-            "message": "No activity data rows found",
-            "fix": "Add at least one activity row"
+            "message": "No activity data rows found"
         })
 
     # ---- 4. Validate each data row ----
@@ -109,8 +106,7 @@ def validate(filepath, expected_week=None):
                 "type": "data",
                 "field": f"社团名称 (row {row_num})",
                 "severity": "error",
-                "message": f"Expected '{EXPECTED_CLUB_NAME}', found '{row['社团名称']}'",
-                "fix": f"Change 社团名称 to '{EXPECTED_CLUB_NAME}' in row {row_num}"
+                "message": f"Expected '{EXPECTED_CLUB_NAME}', found '{row['社团名称']}'"
             })
 
         # 活动内容
@@ -120,8 +116,7 @@ def validate(filepath, expected_week=None):
                 "type": "data",
                 "field": f"活动内容 (row {row_num})",
                 "severity": "warning",
-                "message": f"Activity type '{content}' not in standard list {VALID_ACTIVITY_TYPES}",
-                "fix": f"Change 活动内容 to one of: {', '.join(VALID_ACTIVITY_TYPES)}"
+                "message": f"Activity type '{content}' not in standard list {VALID_ACTIVITY_TYPES}"
             })
 
         # 活动地点
@@ -135,8 +130,7 @@ def validate(filepath, expected_week=None):
                     "type": "data",
                     "field": f"活动地点 (row {row_num})",
                     "severity": "warning",
-                    "message": f"Location '{location}' appears to be building+room but has a space or wrong format",
-                    "fix": f"Remove spaces in 活动地点. Format should be: 博闻楼B-606 (no space between building and room)"
+                    "message": f"Location '{location}' appears to be building+room but has a space or wrong format"
                 })
 
         # 开展时间 format
@@ -146,8 +140,7 @@ def validate(filepath, expected_week=None):
                 "type": "data",
                 "field": f"开展时间 (row {row_num})",
                 "severity": "error",
-                "message": f"Time format incorrect: '{time_str}'",
-                "fix": f"Use format: YYYY年MM月DD日 HH:MM-HH:MM (e.g., 2025年11月12日 18:20-21:00)"
+                "message": f"Time format incorrect: '{time_str}'"
             })
 
         # Week number match (if expected_week given)
@@ -174,8 +167,7 @@ def validate(filepath, expected_week=None):
                 "type": "week_mismatch",
                 "field": f"title / row {row_num}",
                 "severity": "error",
-                "message": f"Title declares week {actual}, but --week={expected} was expected",
-                "fix": f"Update title row week number to 第{expected}周, or run with --week {actual}"
+                "message": f"Title declares week {actual}, but --week={expected} was expected"
             })
 
     passed = len(problems) == 0
@@ -195,54 +187,9 @@ def print_report(passed, problems):
         label = "[ERROR]" if p["severity"] == "error" else "[WARNING]"
         print(f"\n{label} {p['message']}")
         print(f"  Location: {p.get('field', 'N/A')}")
-        print(f"  Fix: {p.get('fix', 'N/A')}")
 
     print(f"\n--- Summary ---")
     print(f"Errors: {len(errors)}  |  Warnings: {len(warnings)}")
-
-
-def apply_fix(problem, filepath):
-    """Apply a single fix to the Excel file. Returns description of what was done."""
-    import openpyxl
-    wb = openpyxl.load_workbook(filepath)
-    ws = wb.active
-
-    field = problem.get("field", "")
-    fix = problem.get("fix", "")
-
-    # Parse row number from field string
-    row_match = re.search(r"row (\d+)", field)
-    if not row_match:
-        return "Could not determine row number"
-
-    row_num = int(row_match.group(1))
-
-    # Parse column from fix string
-    col_name = None
-    new_val = None
-    if "社团名称" in fix and "BP Debate Union" in fix:
-        col_name = "社团名称"
-        new_val = "BP Debate Union"
-    elif "活动内容" in fix:
-        col_name = "活动内容"
-        # Determine which valid type to use based on the fix message context
-        # We cycle through valid types; for a smarter fix we'd inspect the current value
-        # For now, pick 文化沙龙 as the default safe type
-        new_val = "文化沙龙"
-    elif "开展时间" in fix and "YYYY年" in fix:
-        col_name = "开展时间"
-        # Can't auto-determine correct time — flag for user
-        return "Cannot auto-fix time — please edit manually"
-
-    if col_name and new_val:
-        # Map column name to column index
-        col_map = {"社团名称": 1, "活动内容": 2, "活动地点": 3, "开展时间": 4}
-        col_idx = col_map.get(col_name, 1)
-        ws.cell(row=row_num, column=col_idx, value=new_val)
-        wb.save(filepath)
-        return f"Set {col_name} in row {row_num} to '{new_val}'"
-
-    return "Fix not implemented for this case"
 
 
 def main():
@@ -250,30 +197,10 @@ def main():
     parser.add_argument("xlsx_path", help="Path to the event preview .xlsx file")
     parser.add_argument("--week", type=int, default=None,
                         help="Expected week number (e.g. 10 for 第十周)")
-    parser.add_argument("--fix", action="store_true",
-                        help="Prompt to apply each proposed fix")
     args = parser.parse_args()
 
     passed, problems = validate(args.xlsx_path, expected_week=args.week)
     print_report(passed, problems)
-
-    if not passed and args.fix:
-        print("\n=== Apply Fixes ===")
-        for i, p in enumerate(problems, 1):
-            print(f"\n{i}. {p['message']}")
-            print(f"   Fix: {p['fix']}")
-            response = input(f"   Apply this fix? [y/n/q (quit)]: ").strip().lower()
-            if response == "y":
-                result = apply_fix(p, args.xlsx_path)
-                print(f"   → {result}")
-            elif response == "q":
-                break
-
-        # Re-validate after fixes
-        passed, problems = validate(args.xlsx_path, expected_week=args.week)
-        print("\n=== Re-validation ===")
-        print_report(passed, problems)
-
     sys.exit(0 if passed else 1)
 
 

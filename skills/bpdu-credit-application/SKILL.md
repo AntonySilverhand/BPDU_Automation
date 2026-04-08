@@ -86,21 +86,6 @@ After the script exits, the agent MUST NOT rely on script output alone. Instead,
 - Judge whether each PASS/FAIL from the script is actually correct — override the script if it made a wrong call
 - The script is a tool, not an authority — the agent's judgment prevails
 
-## Fix with Approval
-
-Use `--fix` to prompt for each proposed fix:
-
-```bash
-python scripts/validate_credit_app.py "path/to/file.xlsx" --fix
-```
-
-For each problem found, you will be asked:
-- `y` — apply the fix
-- `n` — skip this fix
-- `q` — quit
-
-Fixes are applied one at a time and the file is re-validated after all changes.
-
 ## Submission
 
 **Email:** wzbcgjxystfwb@163.com
