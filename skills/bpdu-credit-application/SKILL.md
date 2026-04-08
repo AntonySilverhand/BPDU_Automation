@@ -53,7 +53,7 @@ Activity counts can combine across: 1 club, 2 clubs, club+dissolved club, etc.
 | 学号 | Required — no blanks |
 | 联系方式 | Required — phone, 7+ digits |
 | 学分数量 | Must be exactly 0.5 or 1 |
-| 备注 | Must be `BP Debate Union` |
+| 备注 | Must contain `BP Debate Union` |
 | 活动认证情况 | Must be **blank** (school fills this upon approval) |
 
 ### Filename Conventions
@@ -76,7 +76,7 @@ python scripts/validate_credit_app.py "path/to/file.xlsx"
 2. Missing columns — checks each required column is present
 3. Empty required cells — checks `isna()` or blank string on all required columns
 4. 学分数量 — value must be exactly 0.5 or 1
-5. 备注 — cell value must be exactly `BP Debate Union`
+5. 备注 — cell must contain `BP Debate Union`
 6. 活动认证情况 — cell must be blank (students do not fill this — school does)
 7. Phone plausibility — strips non-digits, checks remaining digits ≥ 7
 

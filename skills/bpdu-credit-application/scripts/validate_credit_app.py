@@ -118,15 +118,15 @@ def validate_auth_form(df, problems):
                     "message": f"Invalid credit value: '{row['学分数量']}' (must be 0.5 or 1)"
                 })
 
-    # 4. 备注 must be "BP Debate Union"
+    # 4. 备注 must contain "BP Debate Union"
     if "备注" in df.columns:
         for idx, val in df["备注"].items():
-            if str(val).strip() != EXPECTED_CLUB:
+            if EXPECTED_CLUB not in str(val).strip():
                 problems.append({
                     "type": "invalid_data",
                     "field": f"备注 (row {idx+1})",
                     "severity": "error",
-                    "message": f"备注 should be '{EXPECTED_CLUB}', found: '{val}'"
+                    "message": f"备注 should contain '{EXPECTED_CLUB}', found: '{val}'"
                 })
 
     # 5. 活动认证情况 must be blank (students do not fill this)
