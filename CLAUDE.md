@@ -37,9 +37,9 @@ Each skill lives in `skills/<skill-name>/` with a consistent layout:
 | `bpdu-activity-review` | Generate/validate weekly activity review Word doc |
 | `bpdu-credit-application` | Validate credit application Excel forms |
 
-### Agent Double-Check Rule
-
-**Always re-verify validation script output independently.** Validation scripts are tools, not authorities — your judgment prevails after reviewing the results.
+### Document Generation Quality
+- **Uniqueness**: Never rely on the script's default templates for Activity Reviews. Always generate a unique, context-aware description (50-100 words) that reflects the specific topic of the week to avoid repetitive submissions.
+- **Language**: Use professional, third-person Chinese. Use terms like "批判性思维" (critical thinking) and "逻辑推演" (logical deduction).
 
 ## Common Commands
 

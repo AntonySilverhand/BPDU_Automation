@@ -36,7 +36,8 @@ See `references/requirements.md` for full details.
 **Script:** `scripts/generate_review.py`
 
 ```bash
-# Recommended: Let the script generate the description automatically
+# MANDATORY: Generate a unique description using your LLM power, 
+# then pass it via --description. DO NOT rely on the script's default template.
 python scripts/generate_review.py \
     --week 7 \
     --date "11月12日" \
@@ -44,18 +45,13 @@ python scripts/generate_review.py \
     --activity "苏格拉底式研讨会" \
     --participants 20 \
     --topic "社交媒体的continuing the spark现象" \
+    --description "上周三，BP Debate Union在博闻楼B-606开展了研讨会。针对社交媒体'火花'现象，20位同学展开了激烈辩论，从社交心理与技术异化等维度深入分析。活动现场气氛活跃，不仅提升了同学们的即兴表达，更在思想碰撞中深化了对数字化社交的认知..." \
     --photos "photo1.jpg" "photo2.jpg"
-
-# Or provide a custom description
-python scripts/generate_review.py --week 7 --description "..." --photos "p1.jpg" "p2.jpg"
 ```
 
-**Output:** `skills/bpdu-activity-review/output/国际学院BP_Debate_Union_第X周活动剪影.docx`
-
 Notes:
+- **Creative Space**: Agents are REQUIRED to use their own generated content for the `--description` flag. Each week's review should sound distinct.
 - Provide 2–3 photo paths. Minimum 2 required.
-- If `--description` is omitted, one is automatically generated using the other arguments.
-- Filename collision is handled automatically.
 
 ## Validate a Document
 
