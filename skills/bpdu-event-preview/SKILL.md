@@ -39,32 +39,31 @@ See `references/submission_guide.md` for full details.
 **Script:** `scripts/generate_preview.py`
 
 ```bash
+# Basic usage (uses defaults in script)
 python scripts/generate_preview.py --week 10
+
+# Full CLI usage (no script editing required)
+python scripts/generate_preview.py --week 10 \
+    --activity "2026年4月14日" "18:20-20:20" "常规活动" "博闻楼B-602" \
+    --activity "2026年4月15日" "18:20-20:20" "常规活动" "博闻楼B-604"
 ```
 
-Or edit `INPUT DATA` in the script directly:
-
-```python
-WEEK_NUMBER = 10
-ACTIVITIES = [
-    {"日期": "2025年3月30日", "时间": "18:20-20:20", "内容": "常规活动", "地点": "博闻楼B-602"},
-    ...
-]
-```
+The `--activity` flag is repeatable and takes 4 arguments: `DATE`, `TIME`, `CONTENT`, and `LOCATION`.
 
 **Output:** `skills/bpdu-event-preview/output/BP_Debate_Union_第X周活动预告汇总.xlsx`
 
-Filename collision is handled automatically (timestamp suffix added if file exists).
-
 ## Validate a Document
 
-**File formats:** `.xlsx` (Excel), `.xls` (legacy Excel) — standard Office formats, not compressed archives.
+**File formats:** `.xlsx` (Excel), `.xls` (legacy Excel)
 
 **Script:** `scripts/validate_preview.py`
 
 ```bash
 python scripts/validate_preview.py "path/to/file.xlsx" --week 10
 ```
+
+**Options:**
+- `--week X`: Check if the file's content matches the specified week.
 
 **Checks performed:**
 1. Column count — reads `df.shape[1]`, must be ≥ 4
@@ -75,11 +74,9 @@ python scripts/validate_preview.py "path/to/file.xlsx" --week 10
 6. 开展时间 — regex `\d{4}年\d{1,2}月\d{1,2}日 \d{1,2}:\d{2}-\d{1,2}:\d{2}` must match
 7. Week number match — extracts week from title and dates, compares to `--week` argument
 
-**Agent double-check (required after script runs — spawn a subagent):**
-After the script exits, the agent MUST NOT rely on script output alone. Instead, spawn a subagent (Agent tool, general-purpose type) to independently read the Excel file in read-only mode (e.g., pandas `read_excel`) and verify each result. The subagent should report findings without running the validation script. The main agent then synthesizes both the script results and the subagent's independent findings before giving a final judgment.
-- Ask the subagent to: open the file, inspect each column header, scan each row's data cells for empty values, verify time format by reading each date string, confirm 社团名称 on all data rows, confirm activity types
-- Judge whether each PASS/FAIL from the script is actually correct — override the script if it made a wrong call
-- The script is a tool, not an authority — the agent's judgment prevails
+**Agent double-check policy:**
+- **Creation**: No sub-agent manual scan is needed after running a create script.
+- **Validation**: A sub-agent manual scan is ONLY needed when the user explicitly asks to check if there is something wrong with an existing file. In such cases, spawn a subagent (Agent tool, general-purpose type) to independently read the Excel file (e.g., pandas `read_excel`) and verify each result. The subagent should report findings without running the validation script. The main agent then synthesizes both results.
 
 ## Submission
 

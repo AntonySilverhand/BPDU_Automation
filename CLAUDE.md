@@ -46,14 +46,14 @@ Each skill lives in `skills/<skill-name>/` with a consistent layout:
 ```bash
 # Event Preview
 python skills/bpdu-event-preview/scripts/generate_preview.py --week 10
-python skills/bpdu-event-preview/scripts/validate_preview.py "file.xlsx" --week 10 --fix
+python skills/bpdu-event-preview/scripts/validate_preview.py "file.xlsx" --week 10
 
 # Activity Review
 python skills/bpdu-activity-review/scripts/generate_review.py --week 7 --photos "p1.jpg" "p2.jpg"
 python skills/bpdu-activity-review/scripts/validate_review.py "document.docx"
 
 # Credit Application
-python skills/bpdu-credit-application/scripts/validate_credit_app.py "file.xlsx" --fix
+python skills/bpdu-credit-application/scripts/validate_credit_app.py "file.xlsx"
 ```
 
 ## Important Notes

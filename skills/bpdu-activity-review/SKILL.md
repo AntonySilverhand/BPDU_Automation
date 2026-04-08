@@ -36,6 +36,7 @@ See `references/requirements.md` for full details.
 **Script:** `scripts/generate_review.py`
 
 ```bash
+# Recommended: Let the script generate the description automatically
 python scripts/generate_review.py \
     --week 7 \
     --date "11月12日" \
@@ -43,26 +44,22 @@ python scripts/generate_review.py \
     --activity "苏格拉底式研讨会" \
     --participants 20 \
     --topic "社交媒体的continuing the spark现象" \
-    --description "11月12日，BP Debate Union在博闻楼B-606开展了..." \
-    --photos "photo1.jpg" "photo2.jpg" "photo3.jpg"
-```
+    --photos "photo1.jpg" "photo2.jpg"
 
-Or edit the `INPUT DATA` constants at the top of the script directly, then run:
-
-```bash
-python scripts/generate_review.py
+# Or provide a custom description
+python scripts/generate_review.py --week 7 --description "..." --photos "p1.jpg" "p2.jpg"
 ```
 
 **Output:** `skills/bpdu-activity-review/output/国际学院BP_Debate_Union_第X周活动剪影.docx`
 
 Notes:
 - Provide 2–3 photo paths. Minimum 2 required.
-- The description should already contain a last-week time reference (e.g., 上周三) matching the event date.
-- Filename collision is handled automatically (timestamp suffix added if file exists).
+- If `--description` is omitted, one is automatically generated using the other arguments.
+- Filename collision is handled automatically.
 
 ## Validate a Document
 
-**File formats:** `.docx` (Word), `.doc` (legacy Word) — standard Office formats, not compressed archives.
+**File formats:** `.docx` (Word), `.doc` (legacy Word)
 
 **Script:** `scripts/validate_review.py`
 
@@ -79,11 +76,9 @@ python scripts/validate_review.py "path/to/document.docx"
 
 Exit code 0 = all pass, 1 = one or more failures.
 
-**Agent double-check (required after script runs — spawn a subagent):**
-After the script exits, the agent MUST NOT rely on script output alone. Instead, spawn a subagent (Agent tool, general-purpose type) to independently read the file in read-only mode and verify each result. The subagent should report findings without running the validation script. The main agent then synthesizes both the script results and the subagent's independent findings before giving a final judgment.
-- Ask the subagent to: open the .docx file directly (python-docx in read-only mode), count photos by inspecting doc.part.rels, read the description text and manually count Chinese chars and English tokens to verify word count, confirm no first-person language, check Chinese ratio
-- Judge whether each PASS/FAIL from the script is actually correct — override the script if it made a wrong call
-- The script is a tool, not an authority — the agent's judgment prevails
+**Agent double-check policy:**
+- **Creation**: No sub-agent manual scan is needed after running a create script.
+- **Validation**: A sub-agent manual scan is ONLY needed when the user explicitly asks to check if there is something wrong with an existing file. In such cases, spawn a subagent (Agent tool, general-purpose type) to independently read the file (e.g., using `python-docx` in read-only mode) and verify each result. The subagent should report findings without running the validation script. The main agent then synthesizes both results.
 
 ## Submission
 

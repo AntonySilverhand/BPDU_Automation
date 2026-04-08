@@ -213,6 +213,7 @@ def main():
 
     passed, problems = validate(args.xlsx_path)
     print_report(passed, problems)
+
     sys.exit(0 if passed else 1)
 
 

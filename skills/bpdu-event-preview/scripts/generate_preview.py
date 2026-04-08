@@ -18,10 +18,10 @@ from datetime import datetime
 import pandas as pd
 
 # ===================== INPUT DATA =====================
-WEEK_NUMBER = 10
+WEEK_NUMBER = 7
 ACTIVITIES = [
-    {"日期": "2025年4月2日",  "时间": "18:20-20:20", "内容": "日常训练", "地点": "博闻楼B-602"},
-    {"日期": "2025年4月4日",  "时间": "18:20-20:20", "内容": "常规活动", "地点": "博闻楼B-602"},
+    {"日期": "2026年4月14日",  "时间": "18:20-20:20", "内容": "常规活动", "地点": "博闻楼B-602"},
+    {"日期": "2026年4月15日",  "时间": "18:20-20:20", "内容": "常规活动", "地点": "博闻楼B-604"},
 ]
 # =====================================================
 
@@ -34,6 +34,10 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Generate BP DU Event Preview Excel.")
     parser.add_argument("--week", type=int, default=WEEK_NUMBER,
                         help="Week number (e.g. 7 for 第七周)")
+    parser.add_argument("--activity", action="append", nargs=4,
+                        metavar=("DATE", "TIME", "CONTENT", "LOCATION"),
+                        help="Add an activity. Can be repeated. "
+                             "Format: --activity '2026年4月14日' '18:20-20:20' '常规活动' '博闻楼B-602'")
     return parser.parse_args()
 
 
@@ -49,8 +53,20 @@ def make_unique_path(filepath):
 def generate(args):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+    activities_to_process = []
+    if args.activity:
+        for act in args.activity:
+            activities_to_process.append({
+                "日期": act[0],
+                "时间": act[1],
+                "内容": act[2],
+                "地点": act[3]
+            })
+    else:
+        activities_to_process = ACTIVITIES
+
     data = []
-    for a in ACTIVITIES:
+    for a in activities_to_process:
         data.append({
             "社团名称": "BP Debate Union",
             "活动内容": a["内容"],
@@ -61,7 +77,7 @@ def generate(args):
     df = pd.DataFrame(data)
 
     # Title row text
-    title = f"温州商学院2025-2026学年第一学期第{args.week}周社团活动预告"
+    title = f"温州商学院2025-2026学年第二学期第{args.week}周社团活动预告"
 
     filename = f"BP_Debate_Union_第{args.week}周活动预告汇总.xlsx"
     filepath = make_unique_path(os.path.join(OUTPUT_DIR, filename))

@@ -57,7 +57,8 @@ def parse_args():
     parser.add_argument("--activity", type=str, default=ACTIVITY_TYPE)
     parser.add_argument("--participants", type=int, default=PARTICIPANTS)
     parser.add_argument("--topic", type=str, default=TOPIC)
-    parser.add_argument("--description", type=str, default=DESCRIPTION)
+    parser.add_argument("--description", type=str, default=None,
+                        help="Full description. If omitted, one is generated from other arguments.")
     parser.add_argument("--photos", nargs="*", default=PHOTO_PATHS,
                         help="Paths to 2-3 photos (minimum 2 required)")
     return parser.parse_args()
@@ -87,6 +88,16 @@ def generate(args):
             print("ERROR: No valid photos. Cannot generate document.", file=sys.stderr)
             return None
 
+    # Handle description
+    description = args.description
+    if description is None:
+        description = (
+            f"{args.date}，BP Debate Union在{args.location}开展了{args.activity}。"
+            f"本次活动共有{args.participants}名同学参加，围绕{args.topic}展开讨论。"
+            "同学们积极发言，热烈探讨，提升了批判性思维和表达能力。"
+            "大家表示收获颇丰，期待下次参与。"
+        )
+
     filename = generate_filename(args.week)
     filepath = make_unique_path(os.path.join(OUTPUT_DIR, filename))
 
@@ -107,7 +118,7 @@ def generate(args):
         doc.add_paragraph()  # spacing
 
     # Description
-    desc_para = doc.add_paragraph(args.description)
+    desc_para = doc.add_paragraph(description)
     desc_para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
     doc.save(filepath)

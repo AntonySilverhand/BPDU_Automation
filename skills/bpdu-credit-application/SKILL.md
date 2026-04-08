@@ -1,6 +1,6 @@
 ---
 name: bpdu-credit-application
-description: Use when validating student club credit application Excel files for BP Debate Union. Validates both the member submission list and individual certification forms against school requirements. Identifies problems and proposes fixes (with user approval). Examples: "validate credit application files", "check if this student qualifies for 1 credit"
+description: Use when validating student club credit application Excel files for BP Debate Union. Validates both the member submission list and individual certification forms against school requirements. Examples: "validate credit application files", "check if this student qualifies for 1 credit"
 env:
   dependencies:
     - openpyxl
@@ -63,7 +63,7 @@ Activity counts can combine across: 1 club, 2 clubs, club+dissolved club, etc.
 
 ## Validate a File
 
-**File formats:** `.xlsx` (Excel), `.xls` (legacy Excel) — standard Office formats, not compressed archives.
+**File formats:** `.xlsx` (Excel), `.xls` (legacy Excel)
 
 **Script:** `scripts/validate_credit_app.py`
 
@@ -80,11 +80,9 @@ python scripts/validate_credit_app.py "path/to/file.xlsx"
 6. 活动认证情况 — cell must be blank (students do not fill this — school does)
 7. Phone plausibility — strips non-digits, checks remaining digits ≥ 7
 
-**Agent double-check (required after script runs — spawn a subagent):**
-After the script exits, the agent MUST NOT rely on script output alone. Instead, spawn a subagent (Agent tool, general-purpose type) to independently read the Excel file in read-only mode (e.g., pandas `read_excel`) and verify each result. The subagent should report findings without running the validation script. The main agent then synthesizes both the script results and the subagent's independent findings before giving a final judgment.
-- Ask the subagent to: open the file, inspect each column header, scan each row's data cells for empty values, verify 学分数量 values, confirm 备注 cells read as `BP Debate Union`, confirm 活动认证情况 cells are empty
-- Judge whether each PASS/FAIL from the script is actually correct — override the script if it made a wrong call
-- The script is a tool, not an authority — the agent's judgment prevails
+**Agent double-check policy:**
+- **Creation**: No sub-agent manual scan is needed after running a create script.
+- **Validation**: A sub-agent manual scan is ONLY needed when the user explicitly asks to check if there is something wrong with an existing file. In such cases, spawn a subagent (Agent tool, general-purpose type) to independently read the Excel file (e.g., pandas `read_excel`) and verify each result. The subagent should report findings without running the validation script. The main agent then synthesizes both results.
 
 ## Submission
 
