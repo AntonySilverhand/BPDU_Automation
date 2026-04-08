@@ -45,6 +45,11 @@ def validate(filepath, expected_week=None):
         # First, read raw (no header) to detect file structure
         df_raw = pd.read_excel(filepath, header=None)
 
+        # Use openpyxl to check visual styles (fonts, sizes, borders)
+        from openpyxl import load_workbook
+        wb = load_workbook(filepath, data_only=True)
+        ws = wb.active
+
         # Try header=0: row 0 = title, row 1 = column names, row 2+ = data
         df = pd.read_excel(filepath, header=0)
         actual_cols = set(df.columns)
@@ -61,6 +66,81 @@ def validate(filepath, expected_week=None):
 
         # Extract title text from the detected title row
         title_text = str(df_raw.iloc[title_row_idx, 0]) if title_row_idx < len(df_raw) else ""
+
+        # Check if row 1 is merged (A1:D1)
+        is_merged = False
+        for merged_range in ws.merged_cells.ranges:
+            if "A1" in merged_range and "D1" in merged_range:
+                is_merged = True
+                break
+
+        if not is_merged:
+            problems.append({
+                "type": "style",
+                "field": "Row 1",
+                "severity": "warning",
+                "message": "Title row (A1:D1) should be merged"
+            })
+
+        # ---- 0. Visual Style Validation (openpyxl) ----
+        for r_idx, row in enumerate(ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=4), start=1):
+            for cell in row:
+                # Skip secondary cells in the merged title range to avoid false positives
+                if r_idx == 1 and cell.column > 1 and is_merged:
+                    continue
+
+                # Border check
+                if not cell.border or not (cell.border.left.style and cell.border.right.style and cell.border.top.style and cell.border.bottom.style):
+                    problems.append({
+                        "type": "style",
+                        "field": f"Cell {cell.coordinate}",
+                        "severity": "warning",
+                        "message": f"Cell {cell.coordinate} is missing borders"
+                    })
+
+                # Font check
+                if not cell.font or cell.font.name != '等线':
+                    problems.append({
+                        "type": "style",
+                        "field": f"Cell {cell.coordinate}",
+                        "severity": "warning",
+                        "message": f"Cell {cell.coordinate} font is not '等线' (found: {cell.font.name if cell.font else 'None'})"
+                    })
+
+                # Size and Bold check
+                if r_idx == 1: # Title
+                    if cell.font and (cell.font.size != 22 or cell.font.bold):
+                        problems.append({
+                            "type": "style",
+                            "field": f"Cell {cell.coordinate} (Title)",
+                            "severity": "warning",
+                            "message": f"Title font should be size 22 and NOT bold"
+                        })
+                elif r_idx == 2: # Header
+                    if cell.font and (cell.font.size != 11 or cell.font.bold):
+                        problems.append({
+                            "type": "style",
+                            "field": f"Cell {cell.coordinate} (Header)",
+                            "severity": "warning",
+                            "message": f"Header font should be size 11 and NOT bold"
+                        })
+                else: # Body
+                    if cell.font and (cell.font.size != 11 or cell.font.bold):
+                        problems.append({
+                            "type": "style",
+                            "field": f"Cell {cell.coordinate} (Body)",
+                            "severity": "warning",
+                            "message": f"Body font should be size 11 and NOT bold"
+                        })
+
+                # Alignment check
+                if not cell.alignment or cell.alignment.horizontal != 'center' or cell.alignment.vertical != 'center':
+                    problems.append({
+                        "type": "style",
+                        "field": f"Cell {cell.coordinate}",
+                        "severity": "warning",
+                        "message": f"Cell {cell.coordinate} is not center-aligned"
+                    })
 
     except Exception as e:
         return False, [{"type": "file", "message": f"Cannot read Excel file: {e}"}]
