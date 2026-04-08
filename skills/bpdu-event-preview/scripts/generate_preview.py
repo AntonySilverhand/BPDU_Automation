@@ -100,8 +100,8 @@ def generate(args):
     # 2. Styles: Center all cells, Auto-fit columns, and Add Borders
     from openpyxl.styles import Font
     center_align = Alignment(horizontal='center', vertical='center')
-    title_font = Font(name='等线', size=22, bold=True)
-    header_font = Font(name='等线', size=11, bold=True)
+    title_font = Font(name='等线', size=22, bold=False)
+    header_font = Font(name='等线', size=11, bold=False)
     body_font = Font(name='等线', size=11)
 
     thin_border = Border(
