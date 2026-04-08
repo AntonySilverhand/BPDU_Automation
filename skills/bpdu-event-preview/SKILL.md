@@ -1,6 +1,11 @@
 ---
 name: bpdu-event-preview
 description: Use when generating or validating weekly club activity preview Excel files for BP Debate Union. Generates properly formatted .xlsx with title row and activity schedule. Also validates existing files for column structure, title format, activity types, time format, and filename. Examples: "generate event preview for week 10", "validate this event preview Excel"
+env:
+  dependencies:
+    - openpyxl
+    - pandas
+    - tabulate
 ---
 
 # BP DU Event Preview

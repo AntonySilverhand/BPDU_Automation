@@ -39,12 +39,29 @@ def validate(filepath, expected_week=None):
     if not os.path.exists(filepath):
         return False, [{"type": "file", "message": f"File not found: {filepath}"}]
 
+    expected_cols = {"社团名称", "活动内容", "活动地点", "开展时间"}
+
     try:
-        # Read with header=0 so pandas uses row 0 (社团名称/活动内容/活动地点/开展时间) as column names.
-        # This means:
-        #   df index 0 = title row ("温州商学院2025-2026学年第一学期第X周社团活动预告")
-        #   df index 1+ = data rows
+        # First, read raw (no header) to detect file structure
+        df_raw = pd.read_excel(filepath, header=None)
+
+        # Try header=0: row 0 = title, row 1 = column names, row 2+ = data
         df = pd.read_excel(filepath, header=0)
+        actual_cols = set(df.columns)
+        title_row_idx = 0  # With header=0, title is at df index 0 (raw row 0)
+
+        if actual_cols != expected_cols:
+            # Try header=1: row 0 = title (merged), row 1 = column names, row 2+ = data
+            df = pd.read_excel(filepath, header=1)
+            actual_cols = set(df.columns)
+            title_row_idx = 0  # With header=1, title is still at raw row 0
+
+        if actual_cols != expected_cols:
+            return False, [{"type": "structure", "message": f"Column headers do not match expected: {expected_cols}. Found: {actual_cols}. File may have an unexpected structure."}]
+
+        # Extract title text from the detected title row
+        title_text = str(df_raw.iloc[title_row_idx, 0]) if title_row_idx < len(df_raw) else ""
+
     except Exception as e:
         return False, [{"type": "file", "message": f"Cannot read Excel file: {e}"}]
 
@@ -59,8 +76,7 @@ def validate(filepath, expected_week=None):
         })
         return False, problems
 
-    # ---- 1. Title row (df index 0) ----
-    title_text = str(df.iloc[0]["社团名称"])
+    # ---- 1. Title row ----
     if not TITLE_PATTERN.search(title_text):
         problems.append({
             "type": "title",

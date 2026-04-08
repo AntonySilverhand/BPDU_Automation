@@ -73,7 +73,15 @@ def validate(docx_path):
     if not os.path.exists(docx_path):
         return False, [f"File not found: {docx_path}"]
 
-    doc = Document(docx_path)
+    # Reject legacy .doc format — python-docx only supports .docx
+    lower = docx_path.lower()
+    if lower.endswith(".doc") and not lower.endswith(".docx"):
+        return False, ["Unsupported format: .doc (legacy). python-docx only supports .docx. Please convert to .docx first."]
+
+    try:
+        doc = Document(docx_path)
+    except Exception as e:
+        return False, [f"Cannot read .docx file: {e}"]
 
     # ---- Extract text ----
     full_text = "\n".join(para.text for para in doc.paragraphs if para.text.strip())

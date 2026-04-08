@@ -1,6 +1,10 @@
 ---
 name: bpdu-activity-review
 description: Use when generating or validating post-event activity review documents for BP Debate Union. Generates .docx with 2-3 embedded photos and 50-100 word third-person description. Also validates existing documents for photo count, word count, Chinese ratio, time reference, and perspective. Examples: "generate activity review for week 7", "validate this activity review document"
+env:
+  dependencies:
+    - python-docx
+    - tabulate
 ---
 
 # BP DU Activity Review

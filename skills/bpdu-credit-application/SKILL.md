@@ -1,6 +1,11 @@
 ---
 name: bpdu-credit-application
 description: Use when validating student club credit application Excel files for BP Debate Union. Validates both the member submission list and individual certification forms against school requirements. Identifies problems and proposes fixes (with user approval). Examples: "validate credit application files", "check if this student qualifies for 1 credit"
+env:
+  dependencies:
+    - openpyxl
+    - pandas
+    - tabulate
 ---
 
 # BP DU Credit Application Validation
