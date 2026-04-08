@@ -1,0 +1,7 @@
+skills/bpdu-activity-review/output/
+skills/bpdu-event-preview/output/
+skills/bpdu-credit-application/output/
+test_output/
+output/
+*.zip
+venv/
