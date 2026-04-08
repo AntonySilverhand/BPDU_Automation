@@ -88,7 +88,7 @@ def generate(args):
 
     # Post-processing with openpyxl
     from openpyxl import load_workbook
-    from openpyxl.styles import Alignment
+    from openpyxl.styles import Alignment, Border, Side
     wb = load_workbook(filepath)
     ws = wb.active
 
@@ -96,15 +96,28 @@ def generate(args):
     ws.cell(row=1, column=1, value=title)
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=4)
 
-    # 2. Center all cells and 3. Auto-fit columns
+    # 2. Styles: Center all cells, Auto-fit columns, and Add Borders
+    from openpyxl.styles import Font
     center_align = Alignment(horizontal='center', vertical='center')
+    bold_font = Font(bold=True)
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
 
-    # Calculate widths while centering
+    # Calculate widths while applying styles
     column_widths = {}
 
-    for row in ws.iter_rows():
+    for row_idx, row in enumerate(ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=4), start=1):
         for cell in row:
             cell.alignment = center_align
+            cell.border = thin_border
+            # Bold the header row (Row 2) and Title (Row 1)
+            if row_idx <= 2:
+                cell.font = bold_font
+
             if cell.value:
                 # Estimate width: Chinese characters count as 2, others as 1
                 val_str = str(cell.value)
