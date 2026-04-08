@@ -24,7 +24,7 @@ See `references/submission_guide.md` for full details.
 | Columns | 4 required: 社团名称, 活动内容, 活动地点, 开展时间 |
 | Row 1 | Title: `温州商学院YYYY-YYYY学年第一学期第X周社团活动预告` |
 | 社团名称 | Must be `BP Debate Union` on all data rows |
-| 活动内容 | Must be one of: 常规活动, 比赛, 培训, 讲座 |
+| 活动内容 | Must be one of: 文化沙龙, 日常训练, 常规活动 |
 | 活动地点 | Must include building + room (e.g., 博闻楼B-606) |
 | 开展时间 | Format: `YYYY年MM月DD日 HH:MM-HH:MM` |
 | Filename | `BP_Debate_Union_第X周活动预告汇总.xlsx` — week in filename must match content |
@@ -65,7 +65,7 @@ python scripts/validate_preview.py "path/to/file.xlsx" --week 10
 1. Column count — reads `df.shape[1]`, must be ≥ 4
 2. Title row — regex against `温州商学院\d{4}-\d{4}学年第X学期第X周社团活动预告`
 3. 社团名称 — must be exactly `BP Debate Union` on all data rows
-4. 活动内容 — must be one of: 常规活动, 比赛, 培训, 讲座
+4. 活动内容 — must be one of: 文化沙龙, 日常训练, 常规活动
 5. 活动地点 — regex `博闻楼[B研]-[A-Za-z0-9]+` must match
 6. 开展时间 — regex `\d{4}年\d{1,2}月\d{1,2}日 \d{1,2}:\d{2}-\d{1,2}:\d{2}` must match
 7. Week number match — extracts week from title and dates, compares to `--week` argument

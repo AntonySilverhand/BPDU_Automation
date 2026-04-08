@@ -21,7 +21,7 @@ import sys
 
 import pandas as pd
 
-VALID_ACTIVITY_TYPES = {"常规活动", "比赛", "培训", "讲座"}
+VALID_ACTIVITY_TYPES = {"文化沙龙", "日常训练", "常规活动"}
 EXPECTED_CLUB_NAME = "BP Debate Union"
 TITLE_PATTERN = re.compile(
     r"温州商学院\d{4}-\d{4}学年第[一二三四五六七八九十百\d]+学期第[一二三四五六七八九十百\d]+周社团活动预告"
@@ -139,7 +139,7 @@ def validate(filepath, expected_week=None):
                 week_match = re.search(r"第([一二三四五六七八九十百\d]+)周", title_text)
                 if week_match:
                     cn_nums = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5,
-                               "六": 6, "日": 7, "七": 7, "八": 8, "九": 9, "十": 10}
+                               "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
                     week_cn = week_match.group(1)
                     try:
                         actual_week = int(week_cn) if week_cn.isdigit() else cn_nums.get(week_cn[0], None)
@@ -205,7 +205,10 @@ def apply_fix(problem, filepath):
         new_val = "BP Debate Union"
     elif "活动内容" in fix:
         col_name = "活动内容"
-        new_val = "常规活动"
+        # Determine which valid type to use based on the fix message context
+        # We cycle through valid types; for a smarter fix we'd inspect the current value
+        # For now, pick 文化沙龙 as the default safe type
+        new_val = "文化沙龙"
     elif "开展时间" in fix and "YYYY年" in fix:
         col_name = "开展时间"
         # Can't auto-determine correct time — flag for user

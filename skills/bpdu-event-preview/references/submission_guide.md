@@ -19,7 +19,7 @@
 | Column | Required Value | Example |
 |--------|---------------|---------|
 | 社团名称 | BP Debate Union | BP Debate Union |
-| 活动内容 | 常规活动 / 比赛 / 培训 / 讲座 | 常规活动 |
+| 活动内容 | 文化沙龙 / 日常训练 / 常规活动 | 常规活动 |
 | 活动地点 | Building + room | 博闻楼B-606 |
 | 开展时间 | `YYYY年MM月DD日 HH:MM-HH:MM` | 2025年11月12日 18:20-21:00 |
 
