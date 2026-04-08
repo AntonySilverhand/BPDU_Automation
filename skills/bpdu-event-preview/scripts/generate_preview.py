@@ -95,11 +95,15 @@ def generate(args):
     # 1. Add title to Row 1 and merge
     ws.cell(row=1, column=1, value=title)
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=4)
+    ws.row_dimensions[1].height = 30  # Adjust height for larger font
 
     # 2. Styles: Center all cells, Auto-fit columns, and Add Borders
     from openpyxl.styles import Font
     center_align = Alignment(horizontal='center', vertical='center')
-    bold_font = Font(bold=True)
+    title_font = Font(name='等线', size=22, bold=True)
+    header_font = Font(name='等线', size=11, bold=True)
+    body_font = Font(name='等线', size=11)
+
     thin_border = Border(
         left=Side(style='thin'),
         right=Side(style='thin'),
@@ -114,9 +118,14 @@ def generate(args):
         for cell in row:
             cell.alignment = center_align
             cell.border = thin_border
-            # Bold the header row (Row 2) and Title (Row 1)
-            if row_idx <= 2:
-                cell.font = bold_font
+
+            # Apply fonts and sizes
+            if row_idx == 1:
+                cell.font = title_font
+            elif row_idx == 2:
+                cell.font = header_font
+            else:
+                cell.font = body_font
 
             if cell.value:
                 # Estimate width: Chinese characters count as 2, others as 1
