@@ -80,13 +80,9 @@ python scripts/validate_credit_app.py "path/to/file.xlsx"
 6. 活动认证情况 — cell must be blank (students do not fill this — school does)
 7. Phone plausibility — strips non-digits, checks remaining digits ≥ 7
 
-**Agent double-check (required after script runs):**
-After the script exits, the agent MUST independently read the Excel file in read-only mode (e.g., pandas `read_excel`) and verify each result:
-- Open the file and inspect each column header — confirm all required columns are present
-- Scan each row's data cells for empty values
-- Verify 学分数量 values by reading them directly
-- Confirm 备注 cells read as `BP Debate Union`
-- Confirm 活动认证情况 cells are empty
+**Agent double-check (required after script runs — spawn a subagent):**
+After the script exits, the agent MUST NOT rely on script output alone. Instead, spawn a subagent (Agent tool, general-purpose type) to independently read the Excel file in read-only mode (e.g., pandas `read_excel`) and verify each result. The subagent should report findings without running the validation script. The main agent then synthesizes both the script results and the subagent's independent findings before giving a final judgment.
+- Ask the subagent to: open the file, inspect each column header, scan each row's data cells for empty values, verify 学分数量 values, confirm 备注 cells read as `BP Debate Union`, confirm 活动认证情况 cells are empty
 - Judge whether each PASS/FAIL from the script is actually correct — override the script if it made a wrong call
 - The script is a tool, not an authority — the agent's judgment prevails
 

@@ -75,12 +75,9 @@ python scripts/validate_preview.py "path/to/file.xlsx" --week 10
 6. 开展时间 — regex `\d{4}年\d{1,2}月\d{1,2}日 \d{1,2}:\d{2}-\d{1,2}:\d{2}` must match
 7. Week number match — extracts week from title and dates, compares to `--week` argument
 
-**Agent double-check (required after script runs):**
-After the script exits, the agent MUST independently read the Excel file in read-only mode (e.g., pandas `read_excel`) and verify each result:
-- Visually inspect the 4 columns and confirm they match expected names
-- Read each row's values and check them manually
-- Confirm the title row format by reading row 1 directly
-- Check time format by reading each date string
+**Agent double-check (required after script runs — spawn a subagent):**
+After the script exits, the agent MUST NOT rely on script output alone. Instead, spawn a subagent (Agent tool, general-purpose type) to independently read the Excel file in read-only mode (e.g., pandas `read_excel`) and verify each result. The subagent should report findings without running the validation script. The main agent then synthesizes both the script results and the subagent's independent findings before giving a final judgment.
+- Ask the subagent to: open the file, inspect each column header, scan each row's data cells for empty values, verify time format by reading each date string, confirm 社团名称 on all data rows, confirm activity types
 - Judge whether each PASS/FAIL from the script is actually correct — override the script if it made a wrong call
 - The script is a tool, not an authority — the agent's judgment prevails
 

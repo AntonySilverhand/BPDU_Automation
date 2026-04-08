@@ -81,7 +81,12 @@ def validate(docx_path):
     try:
         doc = Document(docx_path)
     except Exception as e:
-        return False, [f"Cannot read .docx file: {e}"]
+        # Still run structural/format checks even if doc is corrupted.
+        # We return partial results so the agent can report what it can determine.
+        results = []
+        results.append(f"[ERROR] Cannot read .docx file: {e}")
+        results.append("[FAIL] All subsequent checks skipped due to file error")
+        return False, results
 
     # ---- Extract text ----
     full_text = "\n".join(para.text for para in doc.paragraphs if para.text.strip())

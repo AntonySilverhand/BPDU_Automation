@@ -79,11 +79,9 @@ python scripts/validate_review.py "path/to/document.docx"
 
 Exit code 0 = all pass, 1 = one or more failures.
 
-**Agent double-check (required after script runs):**
-After the script exits, the agent MUST independently read the file in read-only mode and verify each result:
-- Count photos by inspecting the document inline
-- Read the description text and manually count Chinese chars and English tokens to verify word count
-- Confirm no first-person language by scanning the text
+**Agent double-check (required after script runs — spawn a subagent):**
+After the script exits, the agent MUST NOT rely on script output alone. Instead, spawn a subagent (Agent tool, general-purpose type) to independently read the file in read-only mode and verify each result. The subagent should report findings without running the validation script. The main agent then synthesizes both the script results and the subagent's independent findings before giving a final judgment.
+- Ask the subagent to: open the .docx file directly (python-docx in read-only mode), count photos by inspecting doc.part.rels, read the description text and manually count Chinese chars and English tokens to verify word count, confirm no first-person language, check Chinese ratio
 - Judge whether each PASS/FAIL from the script is actually correct — override the script if it made a wrong call
 - The script is a tool, not an authority — the agent's judgment prevails
 

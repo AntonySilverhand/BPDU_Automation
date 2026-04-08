@@ -126,14 +126,18 @@ def validate(filepath, expected_week=None):
 
         # 活动地点
         location = str(row["活动地点"]).strip()
-        if not LOCATION_PATTERN.search(location):
-            problems.append({
-                "type": "data",
-                "field": f"活动地点 (row {row_num})",
-                "severity": "warning",
-                "message": f"Location '{location}' may not include building+room",
-                "fix": f"Ensure 活动地点 is in format: 博闻楼B-xxx (e.g., 博闻楼B-606)"
-            })
+        # Only validate building+room format when location looks like one.
+        # If it contains building-related keywords, warn if spaces are present or format is wrong.
+        # Arbitrary locations (e.g., "线上", "博闻楼门口集合") are always accepted.
+        if any(kw in location for kw in ("博闻楼", "研", "楼", "室", "馆")):
+            if " " in location or not LOCATION_PATTERN.search(location):
+                problems.append({
+                    "type": "data",
+                    "field": f"活动地点 (row {row_num})",
+                    "severity": "warning",
+                    "message": f"Location '{location}' appears to be building+room but has a space or wrong format",
+                    "fix": f"Remove spaces in 活动地点. Format should be: 博闻楼B-606 (no space between building and room)"
+                })
 
         # 开展时间 format
         time_str = str(row["开展时间"]).strip()
