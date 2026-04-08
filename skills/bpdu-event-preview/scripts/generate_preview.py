@@ -60,18 +60,53 @@ def generate(args):
 
     df = pd.DataFrame(data)
 
-    # Title row
+    # Title row text
     title = f"温州商学院2025-2026学年第一学期第{args.week}周社团活动预告"
-    df_title = pd.DataFrame([[title, "", "", ""]], columns=df.columns)
-    df_final = pd.concat([df_title, df], ignore_index=True)
 
     filename = f"BP_Debate_Union_第{args.week}周活动预告汇总.xlsx"
     filepath = make_unique_path(os.path.join(OUTPUT_DIR, filename))
-    df_final.to_excel(filepath, index=False, engine='openpyxl')
+
+    # Write df starting from row 2 (startrow=1 is 0-indexed, so Row 2)
+    # This puts headers on Row 2 and data on Row 3+
+    df.to_excel(filepath, index=False, engine='openpyxl', startrow=1)
+
+    # Post-processing with openpyxl
+    from openpyxl import load_workbook
+    from openpyxl.styles import Alignment
+    wb = load_workbook(filepath)
+    ws = wb.active
+
+    # 1. Add title to Row 1 and merge
+    ws.cell(row=1, column=1, value=title)
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=4)
+
+    # 2. Center all cells and 3. Auto-fit columns
+    center_align = Alignment(horizontal='center', vertical='center')
+
+    # Calculate widths while centering
+    column_widths = {}
+
+    for row in ws.iter_rows():
+        for cell in row:
+            cell.alignment = center_align
+            if cell.value:
+                # Estimate width: Chinese characters count as 2, others as 1
+                val_str = str(cell.value)
+                length = sum(2 if ord(c) > 127 else 1 for c in val_str)
+                col_letter = cell.column_letter
+                if length > column_widths.get(col_letter, 0):
+                    column_widths[col_letter] = length
+
+    # Apply widths
+    for col_letter, width in column_widths.items():
+        # Add a little padding
+        ws.column_dimensions[col_letter].width = width + 2
+
+    wb.save(filepath)
 
     print(f"Generated: {filepath}")
-    print("\nFile contents:")
-    print(df_final.to_string(index=False))
+    print("\nFile contents (data only):")
+    print(df.to_string(index=False))
     return filepath
 
 
