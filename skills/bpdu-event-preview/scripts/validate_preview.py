@@ -55,17 +55,19 @@ def validate(filepath, expected_week=None):
         actual_cols = set(df.columns)
         title_row_idx = 0  # With header=0, title is at df index 0 (raw row 0)
 
+        header_row = 0  # tracks which pandas header row was used
         if actual_cols != expected_cols:
             # Try header=1: row 0 = title (merged), row 1 = column names, row 2+ = data
+            # Note: with header=1, pandas skips row 0, so df contains only data rows.
             df = pd.read_excel(filepath, header=1)
             actual_cols = set(df.columns)
-            title_row_idx = 0  # With header=1, title is still at raw row 0
+            header_row = 1
 
         if actual_cols != expected_cols:
             return False, [{"type": "structure", "message": f"Column headers do not match expected: {expected_cols}. Found: {actual_cols}. File may have an unexpected structure."}]
 
-        # Extract title text from the detected title row
-        title_text = str(df_raw.iloc[title_row_idx, 0]) if title_row_idx < len(df_raw) else ""
+        # Title is always at raw row 0 regardless of header setting
+        title_text = str(df_raw.iloc[0, 0]) if len(df_raw) > 0 else ""
 
         # Check if row 1 is merged (A1:D1)
         is_merged = False
@@ -164,8 +166,10 @@ def validate(filepath, expected_week=None):
             "message": f"Title row format incorrect: '{title_text}'"
         })
 
-    # ---- 2. Data rows (df index 1+) ----
-    data_rows = df.iloc[1:].reset_index(drop=True)
+    # ---- 2. Data rows ----
+    # With header=0: df.iloc[0] is the title row (carried as a data row by pandas), skip it.
+    # With header=1: pandas already excluded the title row; all of df is data.
+    data_rows = df.iloc[1:].reset_index(drop=True) if header_row == 0 else df.reset_index(drop=True)
 
     if data_rows.empty:
         problems.append({
