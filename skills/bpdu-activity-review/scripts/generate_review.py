@@ -27,7 +27,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 # ===================== INPUT DATA =====================
 # Edit these values, or pass via command-line arguments (command-line takes priority)
-WEEK_NUMBER = 7          # 第几周
+WEEK_NUMBER = None       # 第几周 — always pass --week; this default is intentionally unset
 DATE = "11月12日"          # Date of the activity (last week's format, e.g. 上周三)
 LOCATION = "博闻楼B-606"   # Venue
 ACTIVITY_TYPE = "苏格拉底式研讨会"   # Type of activity
@@ -51,7 +51,8 @@ OUTPUT_DIR = os.path.join(SKILL_DIR, "output")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate BP DU Activity Review Word document.")
-    parser.add_argument("--week", type=int, default=WEEK_NUMBER)
+    parser.add_argument("--week", type=int, required=True,
+                        help="Week number (e.g. 10 for 第十周)")
     parser.add_argument("--date", type=str, default=DATE)
     parser.add_argument("--location", type=str, default=LOCATION)
     parser.add_argument("--activity", type=str, default=ACTIVITY_TYPE)

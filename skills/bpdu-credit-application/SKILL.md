@@ -5,7 +5,6 @@ env:
   dependencies:
     - openpyxl
     - pandas
-    - tabulate
 ---
 
 # BP DU Credit Application Validation

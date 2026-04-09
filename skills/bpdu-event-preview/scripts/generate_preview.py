@@ -18,7 +18,7 @@ from datetime import datetime
 import pandas as pd
 
 # ===================== INPUT DATA =====================
-WEEK_NUMBER = 7
+WEEK_NUMBER = None  # Always pass --week; this default is intentionally unset
 ACTIVITIES = [
     {"日期": "2026年4月14日",  "时间": "18:20-20:20", "内容": "常规活动", "地点": "博闻楼B-602"},
     {"日期": "2026年4月15日",  "时间": "18:20-20:20", "内容": "常规活动", "地点": "博闻楼B-604"},
@@ -32,7 +32,7 @@ OUTPUT_DIR = os.path.join(SKILL_DIR, "output")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate BP DU Event Preview Excel.")
-    parser.add_argument("--week", type=int, default=WEEK_NUMBER,
+    parser.add_argument("--week", type=int, required=True,
                         help="Week number (e.g. 7 for 第七周)")
     parser.add_argument("--activity", action="append", nargs=4,
                         metavar=("DATE", "TIME", "CONTENT", "LOCATION"),

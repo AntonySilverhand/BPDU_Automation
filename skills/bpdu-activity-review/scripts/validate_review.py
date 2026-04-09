@@ -67,26 +67,35 @@ def extract_last_week_date(text):
 
 
 def validate(docx_path):
-    """Run all validation checks. Returns (passed: bool, results: list[str])."""
-    results = []
+    """Run all validation checks. Returns (passed: bool, problems: list[dict]).
+
+    Each problem dict has keys:
+        type     — check name (e.g. "photo_count")
+        severity — "error" or "warning"
+        message  — human-readable description
+        passed   — True if this check passed
+    """
+    problems = []
+
+    def add(check_type, passed, message, severity="error"):
+        problems.append({"type": check_type, "severity": severity, "message": message, "passed": passed})
 
     if not os.path.exists(docx_path):
-        return False, [f"File not found: {docx_path}"]
+        add("file", False, f"File not found: {docx_path}")
+        return False, problems
 
     # Reject legacy .doc format — python-docx only supports .docx
     lower = docx_path.lower()
     if lower.endswith(".doc") and not lower.endswith(".docx"):
-        return False, ["Unsupported format: .doc (legacy). python-docx only supports .docx. Please convert to .docx first."]
+        add("file", False, "Unsupported format: .doc (legacy). python-docx only supports .docx. Please convert to .docx first.")
+        return False, problems
 
     try:
         doc = Document(docx_path)
     except Exception as e:
-        # Still run structural/format checks even if doc is corrupted.
-        # We return partial results so the agent can report what it can determine.
-        results = []
-        results.append(f"[ERROR] Cannot read .docx file: {e}")
-        results.append("[FAIL] All subsequent checks skipped due to file error")
-        return False, results
+        add("file", False, f"Cannot read .docx file: {e}")
+        add("all_checks", False, "All subsequent checks skipped due to file error")
+        return False, problems
 
     # ---- Extract text ----
     full_text = "\n".join(para.text for para in doc.paragraphs if para.text.strip())
@@ -96,42 +105,40 @@ def validate(docx_path):
                    if "image" in rel.target_ref]
     photo_count = len(image_parts)
     if 2 <= photo_count <= 3:
-        results.append(f"[PASS] Photo count: {photo_count} (2-3 required)")
+        add("photo_count", True, f"Photo count: {photo_count} (2-3 required)")
     else:
-        results.append(f"[FAIL] Photo count: {photo_count} (expected 2-3)")
+        add("photo_count", False, f"Photo count: {photo_count} (expected 2-3)")
 
     # ---- 2. Word count ----
     word_count = count_wps_words(full_text)
     if 50 <= word_count <= 100:
-        results.append(f"[PASS] Word count: {word_count} (50-100 required)")
+        add("word_count", True, f"Word count: {word_count} (50-100 required)")
     else:
-        results.append(f"[FAIL] Word count: {word_count} (expected 50-100)")
+        add("word_count", False, f"Word count: {word_count} (expected 50-100)")
 
     # ---- 3. Chinese ratio ----
     ratio = count_chinese_ratio(full_text)
     if ratio > 0.5:
-        results.append(f"[PASS] Chinese ratio: {ratio:.1%} (>50% required)")
+        add("chinese_ratio", True, f"Chinese ratio: {ratio:.1%} (>50% required)")
     else:
-        results.append(f"[FAIL] Chinese ratio: {ratio:.1%} (expected >50%)")
+        add("chinese_ratio", False, f"Chinese ratio: {ratio:.1%} (expected >50%)")
 
     # ---- 4. Time reference ----
     last_week_ref = extract_last_week_date(full_text)
     if last_week_ref:
-        results.append(f"[PASS] Time reference: found '{last_week_ref}' (last-week format)")
+        add("time_reference", True, f"Time reference: found '{last_week_ref}' (last-week format)")
     else:
-        results.append(f"[FAIL] Time reference: no '上周X' pattern found")
+        add("time_reference", False, "Time reference: no '上周X' pattern found")
 
     # ---- 5. Third-person perspective ----
     first_person = any(word in full_text for word in ["我们", "我社", "笔者", "本人"])
     if first_person:
-        results.append(f"[FAIL] Perspective: first-person words detected (must be third-person)")
+        add("perspective", False, "Perspective: first-person words detected (must be third-person)")
     else:
-        results.append(f"[PASS] Perspective: third-person confirmed")
+        add("perspective", True, "Perspective: third-person confirmed")
 
-    # ---- Summary ----
-    passed = all("[PASS]" in r for r in results)
-
-    return passed, results
+    passed = all(p["passed"] for p in problems)
+    return passed, problems
 
 
 def main():
@@ -139,11 +146,12 @@ def main():
     parser.add_argument("docx_path", help="Path to the activity review .docx file")
     args = parser.parse_args()
 
-    passed, results = validate(args.docx_path)
+    passed, problems = validate(args.docx_path)
 
     print(f"\n=== Validation Results ===")
-    for r in results:
-        print(r)
+    for p in problems:
+        tag = "[PASS]" if p["passed"] else f"[{p['severity'].upper()}]"
+        print(f"{tag} {p['message']}")
     print()
     print("OVERALL:", "PASS" if passed else "FAIL")
 

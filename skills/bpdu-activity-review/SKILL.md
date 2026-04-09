@@ -4,7 +4,6 @@ description: Use when generating or validating post-event activity review docume
 env:
   dependencies:
     - python-docx
-    - tabulate
 ---
 
 # BP DU Activity Review

@@ -69,6 +69,9 @@ tool as your FIRST action. Do NOT answer directly, do NOT use other tools first.
 The skill has specialized workflows that produce better results than ad-hoc answers.
 
 Key routing rules:
+- Generate or validate event preview, 活动预告 → invoke bpdu-event-preview
+- Generate or validate activity review, 活动剪影 → invoke bpdu-activity-review
+- Validate credit application, 学分申请 → invoke bpdu-credit-application
 - Product ideas, "is this worth building", brainstorming → invoke office-hours
 - Bugs, errors, "why is this broken", 500 errors → invoke investigate
 - Ship, deploy, push, create PR → invoke ship

@@ -5,7 +5,6 @@ env:
   dependencies:
     - openpyxl
     - pandas
-    - tabulate
 ---
 
 # BP DU Event Preview
