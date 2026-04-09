@@ -98,7 +98,13 @@ def validate(docx_path):
         return False, problems
 
     # ---- Extract text ----
-    full_text = "\n".join(para.text for para in doc.paragraphs if para.text.strip())
+    # Separate title from body: the first non-empty paragraph is treated as the
+    # document title and excluded from the word-count check (which targets the
+    # description body only).
+    non_empty_paras = [para for para in doc.paragraphs if para.text.strip()]
+    title_text = non_empty_paras[0].text if non_empty_paras else ""
+    body_text = "\n".join(para.text for para in non_empty_paras[1:])
+    full_text = "\n".join(para.text for para in non_empty_paras)
 
     # ---- 1. Photo count ----
     image_parts = [rel for rel in doc.part.rels.values()
@@ -110,7 +116,7 @@ def validate(docx_path):
         add("photo_count", False, f"Photo count: {photo_count} (expected 2-3)")
 
     # ---- 2. Word count ----
-    word_count = count_wps_words(full_text)
+    word_count = count_wps_words(body_text)
     if 50 <= word_count <= 100:
         add("word_count", True, f"Word count: {word_count} (50-100 required)")
     else:
