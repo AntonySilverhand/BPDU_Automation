@@ -194,8 +194,13 @@ def print_report(passed, problems):
         print("All checks PASSED.")
         return
 
+    # Problems with no "severity" key are fatal file/structure errors
+    fatal    = [p for p in problems if "severity" not in p]
     errors   = [p for p in problems if p.get("severity") == "error"]
     warnings = [p for p in problems if p.get("severity") == "warning"]
+
+    for p in fatal:
+        print(f"\n[ERROR] {p['message']}")
 
     for p in errors + warnings:
         label = "[ERROR]" if p["severity"] == "error" else "[WARNING]"
@@ -203,7 +208,7 @@ def print_report(passed, problems):
         print(f"  Field: {p.get('field', 'N/A')}")
 
     print(f"\n--- Summary ---")
-    print(f"Errors: {len(errors)}  |  Warnings: {len(warnings)}")
+    print(f"Errors: {len(fatal) + len(errors)}  |  Warnings: {len(warnings)}")
 
 
 def main():
